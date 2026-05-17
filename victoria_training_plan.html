@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Victoria — Training Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F4F0E6;
+  --surface:#FFFFFF;
+  --surface-2:#EDE8DB;
+  --primary:#274D2A;
+  --primary-mid:#4A8C4E;
+  --primary-pale:#EAF3EB;
+  --text:#1A1816;
+  --muted:#7A7468;
+  --border:#D9D3C4;
+  --new:#7B4A2D;
+  --new-bg:#F6EBE2;
+  --checked-bg:#F1F8F2;
+  --r:12px;
+}
+html{font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+/* ─── HEADER ─── */
+.hdr{background:var(--primary);padding:28px 20px 0;position:sticky;top:0;z-index:100}
+.hdr-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;color:#fff;letter-spacing:.02em}
+.hdr-sub{font-size:11px;font-weight:300;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;margin-bottom:14px}
+
+/* ─── WEEK TABS ─── */
+.week-tabs{display:flex;background:var(--primary);padding:0 20px 14px;gap:8px}
+.wtab{flex:1;padding:9px 4px;border:none;border-radius:8px;background:rgba(255,255,255,.13);color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;cursor:pointer;transition:all .2s}
+.wtab.active{background:#fff;color:var(--primary);font-weight:500}
+
+/* ─── WEEK PANELS ─── */
+.wpanel{display:none;padding:16px 14px 0}
+.wpanel.active{display:block}
+
+/* ─── DAY NAV ─── */
+.day-nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.day-nav::-webkit-scrollbar{display:none}
+.dpill{flex-shrink:0;padding:8px 16px;border:1.5px solid var(--border);border-radius:24px;background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .18s}
+.dpill.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:500}
+
+/* ─── DAY PANELS ─── */
+.dpanel{display:none}
+.dpanel.active{display:block}
+
+/* ─── OVERVIEW ─── */
+.overview{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;display:flex;gap:0}
+.ostat{text-align:center;flex:1}
+.ostat-val{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--primary);line-height:1.1}
+.ostat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+.odiv{width:1px;background:var(--border);margin:4px 0}
+
+/* ─── SECTION CARD ─── */
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.scard-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface-2);border-bottom:1px solid var(--border)}
+.scard-hdr-left{display:flex;align-items:center;gap:10px}
+.scard-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ico-warm{background:#FFF3E0}
+.ico-main{background:var(--primary-pale)}
+.ico-cardio{background:#E3F2FD}
+.ico-cool{background:#EDE7F6}
+.scard-title{font-size:14px;font-weight:500}
+.scard-dur{font-size:11px;color:var(--muted);margin-top:1px}
+.scard-prog{font-size:12px;color:var(--primary);font-weight:500;background:var(--primary-pale);padding:3px 10px;border-radius:10px;white-space:nowrap}
+
+/* ─── EXERCISE ROW ─── */
+.exlist{padding:2px 0}
+.exrow{display:flex;align-items:flex-start;padding:13px 14px;border-bottom:1px solid var(--surface-2);gap:11px;position:relative;cursor:pointer;transition:background .15s}
+.exrow:last-child{border-bottom:none}
+.exrow:active{background:var(--surface-2)}
+.exrow.done{background:var(--checked-bg)}
+.exrow input{position:absolute;opacity:0;width:0;height:0}
+.chkbox{width:24px;height:24px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--surface)}
+.exrow.done .chkbox{background:var(--primary);border-color:var(--primary)}
+.chkmark{display:none;color:#fff;font-size:13px;font-weight:700;line-height:1;margin-top:-1px}
+.exrow.done .chkmark{display:block}
+.excontent{flex:1;min-width:0}
+.extop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.exname{font-size:15px;font-weight:500;line-height:1.3;transition:color .15s}
+.exrow.done .exname{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--primary-mid)}
+.exmeta{font-size:13px;color:var(--primary);font-weight:500;white-space:nowrap;flex-shrink:0;margin-top:2px;transition:color .15s}
+.exrow.done .exmeta{color:var(--muted)}
+.new-badge{display:inline-block;font-size:10px;font-weight:500;color:var(--new);background:var(--new-bg);padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.exnotes{font-size:13px;color:var(--muted);line-height:1.55;margin-top:5px;display:none}
+.exnotes.open{display:block}
+.notes-btn{font-size:12px;color:var(--primary-mid);margin-top:5px;cursor:pointer;display:inline-block;user-select:none}
+
+/* ─── CARDIO CARD ─── */
+.cardio-card{background:#EAF3FB;border:1px solid #B6D8EF;border-radius:var(--r);padding:16px;margin-bottom:10px}
+.cardio-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cardio-ico{width:32px;height:32px;background:#3A7FC1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.cardio-ttl{font-size:14px;font-weight:500;color:#173A5E}
+.cardio-dur{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#1E5FAA;margin-bottom:8px}
+.cardio-opts{list-style:none;display:flex;flex-direction:column;gap:5px}
+.cardio-opt{font-size:13px;color:#234B72;padding:7px 10px;background:rgba(255,255,255,.55);border-radius:7px}
+.cardio-rpe{font-size:12px;color:#4A7A9B;margin-top:8px;font-style:italic}
+
+/* ─── RESET ─── */
+.reset-row{display:flex;justify-content:center;margin:6px 0 18px}
+.reset-btn{padding:8px 22px;border:1.5px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .18s}
+.reset-btn:active{background:var(--surface-2);color:var(--text)}
+
+/* ─── NOTES PANEL ─── */
+.notes-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin:0 14px 28px}
+.notes-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:var(--primary);margin-bottom:14px}
+.note-row{display:flex;gap:10px;margin-bottom:12px;font-size:14px;line-height:1.55}
+.note-row:last-child{margin-bottom:0}
+.note-lbl{font-weight:500;white-space:nowrap;flex-shrink:0;min-width:80px}
+.note-txt{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">Victoria's Training Plan</div>
+  <div class="hdr-sub">4-Week Return to Training · Vegan</div>
+  <div class="week-tabs" id="weekTabs">
+    <button class="wtab active" data-week="w12">Weeks 1–2</button>
+    <button class="wtab" data-week="w3">Week 3</button>
+    <button class="wtab" data-week="w4">Week 4</button>
+  </div>
+</div>
+
+<div class="wpanel active" id="w12"></div>
+<div class="wpanel" id="w3"></div>
+<div class="wpanel" id="w4"></div>
+
+<div class="notes-panel">
+  <div class="notes-title">Key Rules</div>
+  <div class="note-row"><span class="note-lbl">Load</span><span class="note-txt">Start lighter than you think you need to. Increase weight only when all reps are complete and the last 2 feel like a 7/10 effort.</span></div>
+  <div class="note-row"><span class="note-lbl">Soreness</span><span class="note-txt">Mild to moderate DOMS: train through it. Severe (difficulty moving normally): reduce intensity 20–30%. Never skip.</span></div>
+  <div class="note-row"><span class="note-lbl">Hard days</span><span class="note-txt">Reduce load 10–15% and focus on form. Do not skip.</span></div>
+  <div class="note-row"><span class="note-lbl">Protein</span><span class="note-txt">115–130g/day. Aim for 25–30g across 4 meals. Pea + rice blend or soy isolate protein powder.</span></div>
+  <div class="note-row"><span class="note-lbl">Posture</span><span class="note-txt">UCS (rounded shoulders) and APT (forward pelvis) correctives are in every warm-up and cool-down. Do not skip them.</span></div>
+</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+
+const WARMUP = {
+  title:'Warm-Up', dur:'10 min', icon:'🌅', icoClass:'ico-warm', type:'warmup',
+  exercises:[
+    {name:'Chin Tuck',meta:'2 × 10 × 3s hold',notes:'Stand against a wall. Pull chin straight back — not down. Hold 3 seconds each rep. UCS corrective.'},
+    {name:'Band Pull-Apart',meta:'2 × 15',notes:'Light resistance band. Arms straight out in front, pull band apart to chest level. Squeeze shoulder blades fully at the end.'},
+    {name:'Glute Bridge + PPT Cue',meta:'2 × 12',notes:'Lie on back, feet flat, knees bent. Drive hips up. At the top, deliberately tuck your pelvis — tailbone curls toward ribs. Hold 1 second. APT corrective.'},
+    {name:'Dead Bug',meta:'2 × 8 each side',notes:'Lie on back, arms pointing to ceiling, knees at 90°. Slowly extend opposite arm and leg toward the floor. Lower back stays flat the entire time. Slow and controlled.'},
+    {name:'Half-Kneeling Hip Flexor Stretch',meta:'1 × 45s each side',notes:'One knee on the floor, one foot forward. Brace your core before leaning forward. Do not let your lower back arch to get the stretch — that defeats the purpose.'},
+    {name:'Bodyweight Reverse Lunge',meta:'1 × 10 each side',notes:'Slow and controlled. Focus on balance.'},
+  ]
+};
+
+const COOLDOWN = {
+  title:'Cool-Down', dur:'5 min', icon:'🌙', icoClass:'ico-cool', type:'cooldown',
+  exercises:[
+    {name:'Doorway Chest Stretch',meta:'2 × 30s each side',notes:'Place forearm on a doorframe, elbow at 90°. Gently rotate your body away from your arm. A comfortable pull is enough — do not strain.'},
+    {name:'Half-Kneeling Hip Flexor Stretch',meta:'2 × 45s each side',notes:'Core braced. No lower back arch.'},
+    {name:'Wall Angel',meta:'2 × 10',notes:'Heels, glutes, upper back, and head against wall. Arms in goalpost position. Slowly slide arms up and overhead, keeping everything in contact with the wall.'},
+    {name:'Child\'s Pose',meta:'1 × 60s',notes:'Kneel, sit back toward heels, extend arms forward. Breathe slowly.'},
+  ]
+};
+
+function cardioSection(mins){
+  return {type:'cardio', mins};
+}
+
+const SESSIONS = {
+
+  totalBody:{
+    focus:'Total Body', dur:'55–65 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout', dur:'', icon:'💪', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Goblet Squat',meta:'3 × 12',notes:'Hold one dumbbell at your chest with both hands. Stand tall, brace your core, squat to parallel or as deep as comfortable without your lower back rounding. Chest stays up.'},
+          {name:'Romanian Deadlift (DBs)',meta:'3 × 12',notes:'Light dumbbells. Stand tall, hinge at the hips with a soft bend in the knees. Let the DBs track close to your legs as you lower. Feel the stretch in the hamstrings. Keep your back flat.'},
+          {name:'Glute Bridge',meta:'3 × 15',notes:'Feet flat on floor, hip-width apart. Drive through your heels to lift your hips. At the top, deliberately tuck your pelvis — squeeze your glutes, not your lower back.'},
+          {name:'Seated Cable Row',meta:'3 × 12',notes:'Neutral or pronated grip. Sit tall. Pull the handle to your lower ribs. Squeeze your shoulder blades together at the end. No momentum.'},
+          {name:'DB Incline Press (30° bench)',meta:'3 × 12',notes:'Elbows at roughly 45° from your torso — not flared out wide. Lower the DBs with control. Press straight up.'},
+          {name:'Face Pull (cable or band)',meta:'3 × 15',notes:'Pull to nose level. At the end of the movement, rotate your hands so your thumbs point back behind you. This external rotation is the whole point. UCS corrective.'},
+          {name:'Dead Bug',meta:'2 × 8 each side',notes:'Core finisher. Lie on back, arms to ceiling, knees at 90°. Slowly extend opposite arm and leg. Lower back stays flat throughout. Slow and controlled.'},
+        ]
+      },
+      cardioSection(10),
+      COOLDOWN,
+    ]
+  },
+
+  lowerW3:{
+    focus:'Glute & Hamstring Focus', dur:'60–70 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Lower', dur:'', icon:'🦵', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Goblet Squat',meta:'3 × 12',notes:'Add a small amount of weight if Week 2 felt easy across all sets.'},
+          {name:'Romanian Deadlift (DBs)',meta:'3 × 12',notes:'Increase load slightly if form was solid throughout Week 2.'},
+          {name:'Hip Thrust (bodyweight, on bench)',meta:'4 × 15',isNew:true,notes:'Sit on the floor with your upper back against a bench, feet flat on the floor. Drive hips up until your body forms a straight line from knees to shoulders. Squeeze glutes hard at the top. Begin with bodyweight only.'},
+          {name:'Leg Curl (machine)',meta:'3 × 12',notes:'Full range of motion. Control the return — do not let the weight drop.'},
+          {name:'Reverse Lunge (light DBs)',meta:'3 × 10 each',notes:'Add light dumbbells if bodyweight felt easy in Weeks 1–2.'},
+          {name:'Cable Pull-Through',meta:'3 × 15',isNew:true,notes:'Stand facing away from a low cable. Hinge forward at the hips, letting the cable pull between your legs. Drive your hips forward to stand. This is a hip hinge, not a squat. Light load only.'},
+          {name:'Posterior Pelvic Tilt Drill',meta:'2 × 10 × 3s hold',notes:'Lie on your back. Actively flatten your lower back into the floor by tucking your pelvis. Hold 3 seconds. APT corrective — end of every lower session.'},
+        ]
+      },
+      cardioSection(15),
+      COOLDOWN,
+    ]
+  },
+
+  upperW3:{
+    focus:'Posture-Corrective Focus', dur:'60–70 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Upper', dur:'', icon:'💪', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Lat Pulldown (underhand grip)',meta:'3 × 12',notes:'Initiate the movement with your lats — not your arms. Think about pulling your elbows down and back.'},
+          {name:'Seated Cable Row (pronated grip)',meta:'3 × 12',notes:'Scapular retraction is the goal. Pull to your lower ribs. Squeeze the shoulder blades together and hold briefly.'},
+          {name:'DB Incline Press (30°)',meta:'3 × 12',notes:'Slight load increase from Weeks 1–2 if form was solid.'},
+          {name:'Seated DB Shoulder Press',meta:'3 × 12',notes:'Core braced throughout. Do not arch your lower back to press the weight up.'},
+          {name:'Face Pull',meta:'3 × 15',notes:'Perform this between every push set as active rest — not just at the end of the session. External rotation cue: thumbs back at the end of the movement.'},
+          {name:'Band Pull-Apart',meta:'3 × 20',notes:'Also used as active rest between push sets. Full retraction at end range.'},
+          {name:'Prone Y-T-W',meta:'2 × 10 each',isNew:true,notes:'Lie face down on the floor or a bench. Make a Y shape with your arms (thumbs up), then a T shape, then a W shape. Hold each position briefly at the top. Bodyweight only — no weight. Targets all three parts of the trapezius and the rear delts.'},
+        ]
+      },
+      cardioSection(15),
+      COOLDOWN,
+    ]
+  },
+
+  lowerA:{
+    focus:'Glute & Hamstring Focus', dur:'65–75 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Lower A', dur:'', icon:'🦵', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Goblet Squat',meta:'3 × 12',notes:'Continue load progression from Week 3.'},
+          {name:'Romanian Deadlift (DBs)',meta:'4 × 12',notes:'One extra set vs. Week 3. Only increase load if your form was consistently solid last week.'},
+          {name:'Hip Thrust (barbell or heavy DBs)',meta:'4 × 12',notes:'Progress from bodyweight if Week 3 felt controlled throughout. Add a barbell across your hips (padded) or hold a dumbbell on your pelvis. Drive through heels, squeeze glutes at top.'},
+          {name:'Leg Curl (machine)',meta:'3 × 12',notes:'Small load increase from Week 3 if last set felt easy.'},
+          {name:'Single-Leg RDL',meta:'3 × 10 each',isNew:true,notes:'Bodyweight or light dumbbell. Hinge forward on one leg, let the other extend behind you. Go slow — balance is the challenge here, not the load. Keep hips square.'},
+          {name:'Cable Pull-Through',meta:'3 × 15',notes:'Small load increase from Week 3. Same cues apply.'},
+          {name:'Posterior Pelvic Tilt Drill',meta:'2 × 10 × 3s hold',notes:'Lie on back. Flatten lower back into floor by tucking pelvis. Hold 3 seconds. APT corrective — end of every lower session.'},
+        ]
+      },
+      cardioSection(20),
+      COOLDOWN,
+    ]
+  },
+
+  upperA:{
+    focus:'Pull & Posture Focus', dur:'65–75 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Upper A', dur:'', icon:'💪', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Lat Pulldown (underhand grip)',meta:'4 × 12',notes:'One extra set vs. Week 3. Initiate with lats, not arms.'},
+          {name:'Chest-Supported DB Row',meta:'3 × 12',isNew:true,notes:'Set an incline bench to 30–45°. Lie face down on it. Row both DBs simultaneously, driving elbows back. This removes all lower back demand — you cannot use momentum. Scapular retraction focus.'},
+          {name:'Seated Cable Row',meta:'3 × 12',notes:'Continuing from Week 3. Pull to lower ribs, squeeze and hold.'},
+          {name:'DB Incline Press (30°)',meta:'3 × 12',notes:'Load progression continuing from Week 3.'},
+          {name:'Face Pull',meta:'3 × 15',notes:'Between every push set as active rest. Thumbs back at the end of each rep.'},
+          {name:'Band Pull-Apart',meta:'3 × 20',notes:'Active rest between push sets. Full retraction.'},
+          {name:'Prone Y-T-W',meta:'2 × 10 each',notes:'Bodyweight. Same cues as Week 3. Slow and controlled.'},
+        ]
+      },
+      cardioSection(20),
+      COOLDOWN,
+    ]
+  },
+
+  fullBody:{
+    focus:'Conditioning Day', dur:'45–50 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Full Body', dur:'Lighter load, higher reps', icon:'⚡', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Goblet Squat',meta:'2 × 15',notes:'Lighter than Monday. Focus on depth and control.'},
+          {name:'Glute Bridge',meta:'3 × 20',notes:'PPT cue at the top of every rep. Squeeze glutes deliberately.'},
+          {name:'Reverse Lunge',meta:'2 × 12 each',notes:'Bodyweight or very light DBs. Movement quality focus.'},
+          {name:'Seated Cable Row',meta:'2 × 15',notes:'Lighter than Tuesday. Full range of motion focus.'},
+          {name:'DB Incline Press',meta:'2 × 15',notes:'Lighter. Slow controlled tempo. This is not a heavy day.'},
+          {name:'Face Pull',meta:'2 × 20',notes:'UCS corrective. Pull to nose level, thumbs back.'},
+          {name:'Dead Bug',meta:'3 × 8 each side',notes:'Core. Slow. Lower back flat throughout.'},
+          {name:'Band Pull-Apart',meta:'2 × 20',notes:'Finisher. Full retraction at end range.'},
+        ]
+      },
+      cardioSection(20),
+      COOLDOWN,
+    ]
+  },
+
+  lowerB:{
+    focus:'Quad-Balanced', dur:'65–75 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Lower B', dur:'', icon:'🦵', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'Bulgarian Split Squat',meta:'3 × 10 each',isNew:true,notes:'Rear foot elevated on a bench behind you, front foot forward. Lower your back knee toward the floor. Front knee tracks over your toes. Begin with bodyweight — this will be harder than it looks.'},
+          {name:'Leg Press',meta:'3 × 12',notes:'Stop at 90° of hip flexion — do not let your lower back peel off the pad at the bottom. Feet hip-width apart.'},
+          {name:'Hip Thrust',meta:'3 × 12',notes:'Same load and cues as Monday. Upper back on bench, squeeze glutes at top, PPT cue.'},
+          {name:'Leg Extension (machine)',meta:'3 × 15',notes:'Isolated quad work. Full range of motion. Control the lowering phase.'},
+          {name:'Leg Curl (machine)',meta:'3 × 12',notes:'Hamstring balance to the quad work above. Full ROM, control the return.'},
+          {name:'Calf Raise (standing or seated)',meta:'3 × 15',notes:'Full range — all the way up, all the way down. Do not bounce at the bottom. Pause at the top.'},
+        ]
+      },
+      cardioSection(20),
+      COOLDOWN,
+    ]
+  },
+
+  upperB:{
+    focus:'Push & Shoulder Stability', dur:'65–75 min',
+    sections:[
+      WARMUP,
+      {
+        title:'Main Workout — Upper B', dur:'', icon:'💪', icoClass:'ico-main', type:'main',
+        exercises:[
+          {name:'DB Incline Press',meta:'4 × 10',notes:'Slightly heavier than Wednesday. Primary push movement. Elbows at 45° from torso.'},
+          {name:'Arnold Press',meta:'3 × 12',isNew:true,notes:'Start with palms facing you, DBs at shoulder height. As you press up, rotate your palms forward. Full rotation through the press. Do not rush it. Core braced throughout.'},
+          {name:'Lat Pulldown (underhand grip)',meta:'3 × 12',notes:'Vertical pull. Chest tall throughout. Initiate with lats.'},
+          {name:'Seated DB Shoulder Press',meta:'3 × 12',notes:'Core braced. Control the descent. Do not arch the lower back.'},
+          {name:'Face Pull',meta:'3 × 15',notes:'Every push session includes this. Not optional. Thumbs back at end range.'},
+          {name:'Band Pull-Apart',meta:'3 × 20',notes:'Scapular retraction. Light band, full range.'},
+          {name:'Lateral Raise (light DBs)',meta:'3 × 15',isNew:true,notes:'Go lighter than you expect — these accumulate quickly. Slight forward lean, lead with your elbows, raise to shoulder level only. Do not shrug.'},
+        ]
+      },
+      cardioSection(20),
+      COOLDOWN,
+    ]
+  }
+
+};
+
+// ─── PLAN STRUCTURE ────────────────────────────────────────────────────────────
+
+const PLAN = {
+  w12:{
+    label:'Weeks 1–2',
+    days:[
+      {id:'w12-mon', label:'Monday',   sessionKey:'totalBody'},
+      {id:'w12-wed', label:'Wednesday',sessionKey:'totalBody'},
+      {id:'w12-fri', label:'Friday',   sessionKey:'totalBody'},
+    ]
+  },
+  w3:{
+    label:'Week 3',
+    days:[
+      {id:'w3-mon', label:'Monday',   sessionKey:'lowerW3', sublabel:'Lower'},
+      {id:'w3-tue', label:'Tuesday',  sessionKey:'upperW3', sublabel:'Upper'},
+      {id:'w3-thu', label:'Thursday', sessionKey:'lowerW3', sublabel:'Lower'},
+      {id:'w3-fri', label:'Friday',   sessionKey:'upperW3', sublabel:'Upper'},
+    ]
+  },
+  w4:{
+    label:'Week 4',
+    days:[
+      {id:'w4-mon', label:'Monday',    sessionKey:'lowerA',   sublabel:'Lower A'},
+      {id:'w4-tue', label:'Tuesday',   sessionKey:'upperA',   sublabel:'Upper A'},
+      {id:'w4-wed', label:'Wednesday', sessionKey:'fullBody', sublabel:'Full Body'},
+      {id:'w4-thu', label:'Thursday',  sessionKey:'lowerB',   sublabel:'Lower B'},
+      {id:'w4-fri', label:'Friday',    sessionKey:'upperB',   sublabel:'Upper B'},
+    ]
+  }
+};
+
+// ─── RENDER ────────────────────────────────────────────────────────────────────
+
+function lsKey(dayId, secIdx, exIdx){ return `victoria-${dayId}-${secIdx}-${exIdx}`; }
+
+function isDone(dayId, secIdx, exIdx){
+  return localStorage.getItem(lsKey(dayId,secIdx,exIdx)) === '1';
+}
+
+function setDone(dayId, secIdx, exIdx, val){
+  if(val) localStorage.setItem(lsKey(dayId,secIdx,exIdx),'1');
+  else localStorage.removeItem(lsKey(dayId,secIdx,exIdx));
+}
+
+function renderCardio(mins, dayId, secIdx){
+  const opts = ['Stationary bike — moderate resistance, steady pace','Treadmill — brisk walk, 1–2% incline','Elliptical — easy, consistent effort'];
+  return `<div class="cardio-card">
+    <div class="cardio-top">
+      <div class="cardio-ico">🚴</div>
+      <div class="cardio-ttl">Post-Workout Cardio</div>
+    </div>
+    <div class="cardio-dur">${mins} min</div>
+    <ul class="cardio-opts">
+      ${opts.map(o=>`<li class="cardio-opt">${o}</li>`).join('')}
+    </ul>
+    <div class="cardio-rpe">RPE 4–5 out of 10 · conversational pace</div>
+  </div>`;
+}
+
+function countProgress(dayId, secIdx, exercises){
+  const total = exercises.length;
+  const done = exercises.filter((_,ei)=>isDone(dayId,secIdx,ei)).length;
+  return {done,total};
+}
+
+function renderSection(sec, dayId, secIdx){
+  if(sec.type==='cardio') return renderCardio(sec.mins, dayId, secIdx);
+
+  const exercises = sec.exercises || [];
+  const {done,total} = countProgress(dayId, secIdx, exercises);
+
+  const exRows = exercises.map((ex,ei)=>{
+    const checked = isDone(dayId,secIdx,ei);
+    const newBadge = ex.isNew ? `<span class="new-badge">New</span>` : '';
+    return `<label class="exrow${checked?' done':''}" data-day="${dayId}" data-sec="${secIdx}" data-ex="${ei}">
+      <input type="checkbox" ${checked?'checked':''}>
+      <div class="chkbox"><span class="chkmark">✓</span></div>
+      <div class="excontent">
+        <div class="extop">
+          <span class="exname">${ex.name}${newBadge}</span>
+          <span class="exmeta">${ex.meta}</span>
+        </div>
+        ${ex.notes?`<span class="notes-btn" data-action="toggle-notes">Notes ▾</span>
+        <div class="exnotes">${ex.notes}</div>`:''}
+      </div>
+    </label>`;
+  }).join('');
+
+  const durHtml = sec.dur ? `<div class="scard-dur">${sec.dur}</div>` : '';
+
+  return `<div class="scard" data-day="${dayId}" data-sec="${secIdx}">
+    <div class="scard-hdr">
+      <div class="scard-hdr-left">
+        <div class="scard-icon ${sec.icoClass}">${sec.icon}</div>
+        <div>
+          <div class="scard-title">${sec.title}</div>
+          ${durHtml}
+        </div>
+      </div>
+      <div class="scard-prog" id="prog-${dayId}-${secIdx}">${done}/${total}</div>
+    </div>
+    <div class="exlist">${exRows}</div>
+  </div>`;
+}
+
+function renderDay(day){
+  const session = SESSIONS[day.sessionKey];
+  const sublabel = day.sublabel ? ` · ${day.sublabel}` : '';
+  const sections = session.sections.map((sec,si)=>renderSection(sec,day.id,si)).join('');
+  const resetId = `reset-${day.id}`;
+  return `<div class="dpanel" id="${day.id}">
+    <div class="overview">
+      <div class="ostat">
+        <div class="ostat-val">${session.focus}</div>
+        <div class="ostat-lbl">Focus</div>
+      </div>
+      <div class="odiv"></div>
+      <div class="ostat">
+        <div class="ostat-val">${session.dur}</div>
+        <div class="ostat-lbl">Duration</div>
+      </div>
+    </div>
+    ${sections}
+    <div class="reset-row">
+      <button class="reset-btn" id="${resetId}" data-day="${day.id}">Reset Day</button>
+    </div>
+  </div>`;
+}
+
+function renderWeek(weekKey){
+  const week = PLAN[weekKey];
+  const el = document.getElementById(weekKey);
+
+  const dayNav = `<div class="day-nav" id="daynav-${weekKey}">
+    ${week.days.map((d,i)=>`<button class="dpill${i===0?' active':''}" data-week="${weekKey}" data-day="${d.id}">${d.label}</button>`).join('')}
+  </div>`;
+
+  const days = week.days.map(d=>renderDay(d)).join('');
+
+  el.innerHTML = dayNav + days;
+
+  // show first day
+  el.querySelector('.dpanel').classList.add('active');
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+
+['w12','w3','w4'].forEach(renderWeek);
+
+// ─── EVENTS ────────────────────────────────────────────────────────────────────
+
+// Week tabs
+document.getElementById('weekTabs').addEventListener('click',e=>{
+  const btn = e.target.closest('.wtab');
+  if(!btn) return;
+  const week = btn.dataset.week;
+  document.querySelectorAll('.wtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.wpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(week).classList.add('active');
+});
+
+// Day pills + exercise rows + notes toggles + reset (delegated to document)
+document.addEventListener('click',e=>{
+
+  // Day pill
+  const pill = e.target.closest('.dpill');
+  if(pill){
+    const weekKey = pill.dataset.week;
+    const dayId = pill.dataset.day;
+    const weekEl = document.getElementById(weekKey);
+    weekEl.querySelectorAll('.dpill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    weekEl.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+    document.getElementById(dayId).classList.add('active');
+    return;
+  }
+
+  // Notes toggle
+  if(e.target.dataset.action==='toggle-notes'){
+    const btn = e.target;
+    const notesEl = btn.nextElementSibling;
+    if(notesEl && notesEl.classList.contains('exnotes')){
+      const open = notesEl.classList.toggle('open');
+      btn.textContent = open ? 'Notes ▴' : 'Notes ▾';
+    }
+    e.stopPropagation();
+    return;
+  }
+
+  // Checkbox / exercise row
+  const row = e.target.closest('.exrow');
+  if(row && !e.target.dataset.action){
+    const {day,sec,ex} = row.dataset;
+    const nowDone = !row.classList.contains('done');
+    setDone(day, parseInt(sec), parseInt(ex), nowDone);
+    row.classList.toggle('done', nowDone);
+    const cb = row.querySelector('input[type=checkbox]');
+    if(cb) cb.checked = nowDone;
+    updateProgress(day, parseInt(sec));
+    return;
+  }
+
+  // Reset button
+  const reset = e.target.closest('.reset-btn');
+  if(reset){
+    const dayId = reset.dataset.day;
+    // find all exrows in this day
+    const panel = document.getElementById(dayId);
+    if(!panel) return;
+    panel.querySelectorAll('.exrow').forEach(row=>{
+      const {day,sec,ex} = row.dataset;
+      setDone(day,parseInt(sec),parseInt(ex),false);
+      row.classList.remove('done');
+      const cb = row.querySelector('input[type=checkbox]');
+      if(cb) cb.checked = false;
+    });
+    // reset all progress counters
+    panel.querySelectorAll('.scard').forEach(sc=>{
+      const secIdx = sc.dataset.sec;
+      const progEl = document.getElementById(`prog-${dayId}-${secIdx}`);
+      if(progEl){
+        const total = sc.querySelectorAll('.exrow').length;
+        progEl.textContent = `0/${total}`;
+      }
+    });
+  }
+
+});
+
+function updateProgress(dayId, secIdx){
+  const scard = document.querySelector(`.scard[data-day="${dayId}"][data-sec="${secIdx}"]`);
+  if(!scard) return;
+  const rows = scard.querySelectorAll('.exrow');
+  const total = rows.length;
+  const done = [...rows].filter(r=>r.classList.contains('done')).length;
+  const progEl = document.getElementById(`prog-${dayId}-${secIdx}`);
+  if(progEl) progEl.textContent = `${done}/${total}`;
+}
+</script>
+</body>
+</html>
